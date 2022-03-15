@@ -1,0 +1,13 @@
+body {
+    width: 600px;
+}
+input {
+    width: 97%;
+}
+label {
+    vertical-align: top;
+}
+textarea {
+    width: 97%;
+    height: 100px;
+}

@@ -1,0 +1,52 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+    <p>
+        Create YouTube links for OneNote
+    </p>
+    <p>
+        <label for="inputUrl">url</label>
+        <input id="inputUrl">
+    </p>
+    <p>
+        <button id="buttonTime">make time</button>
+        <button id="buttonPaste">paste url</button>
+    </p>
+    <p>
+        <label for="inputTime">time</label>
+        <input id="inputTime">
+    </p>
+    <p>
+        <button id="buttonHtml">with time</button>
+    </p>
+    <p>
+        <label for="inputHtml">url with time</label>
+        <input id="inputHtml">
+    </p>
+    <p>
+        <button id="buttonGo">go!</button>
+        <button id="buttonCopy">copy html with time</button>
+        <span class="msg" id="msgHtmlCopied">copied!</span>
+    </p>
+    <p>
+        <label for="inputSubject">subject</label>
+        <input id="inputSubject">
+    </p>
+    <p>
+        <button id="buttonOneNote">make one note</button>
+    </p>
+    <p>
+        <label for="inputOneNote">html one note</label>
+        <textarea id="inputOneNote"></textarea>
+    </p>
+    <p>
+        <button id="buttonCopyOneNote">copy html one note</button>
+        <span class="msg" id="msgOneNoteCopied">copied!</span>
+    </p>
+
+    <script type="module" src="popup.js"></script>
+</body>
+</html>

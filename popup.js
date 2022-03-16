@@ -1,10 +1,4 @@
-/*
-https://youtu.be/0r786YiL92Y?t=35
-of
-https://www.youtube.com/watch?v=0r786YiL92Y&t=32s
- */
-
-import {currentTab, getSeconds, getTime, navigateToUrl} from "./lib.js";
+import {currentTab, getSeconds, getTime, navigateToUrl, sepLines} from "./lib.js";
 import {bindToClick, bindToEnterKey} from "./bind.js";
 
 const inputUrl = document.getElementById('inputUrl');
@@ -20,9 +14,12 @@ const buttonCopy = document.getElementById('buttonCopy');
 const buttonOneNote = document.getElementById('buttonOneNote');
 const buttonCopyOneNote = document.getElementById('buttonCopyOneNote');
 const buttonPaste = document.getElementById('buttonPaste');
+const buttonSpanToDiv = document.getElementById('buttonSpanToDiv');
+const buttonPasteHtml = document.getElementById('buttonPasteHtml');
 
 const msgHtmlCopied = document.getElementById('msgHtmlCopied');
 const msgOneNoteCopied = document.getElementById('msgOneNoteCopied');
+const msgOneNoteSeparated = document.getElementById('msgOneNoteSeparated');
 
 const htmltext = "text/html";
 
@@ -90,9 +87,29 @@ function toUrl() {
 }
 
 function pasteUrl() {
-    console.log('paste...')
     inputUrl.select();
     document.execCommand('paste');
+}
+
+function pasteHtml() {
+    inputOneNote.select();
+    document.execCommand('paste')
+    // chrome.runtime.sendMessage({request: 'getClipboardData'},
+    //     () => {
+    //         chrome.runtime.sendMessage({request: 'getSaved'},
+    //             response => {
+    //                 console.log(response.data);
+    //                 // doPasteImage(openedCard, response.data);
+    //             });
+    //     });
+}
+
+function spanToDiv() {
+    if (inputOneNote.value.length > 0 &&
+        inputOneNote.value.indexOf('<a class="yt-') !== -1) {
+        inputOneNote.value = sepLines(inputOneNote.value);
+        msgOneNoteSeparated.style.visibility = 'visible';
+    }
 }
 
 function bind() {
@@ -103,18 +120,25 @@ function bind() {
         [buttonCopy, copyHtml],
         [buttonOneNote, makeOneNote],
         [buttonCopyOneNote, copyOneNote],
-        [buttonPaste, pasteUrl]
+        [buttonPaste, pasteUrl],
+        [buttonSpanToDiv, spanToDiv],
+        [buttonPasteHtml, pasteHtml]
     ])
     bindToEnterKey([
         [inputUrl, makeTime],
         [inputTime, makeHtml],
         [inputHtml, toUrl]
     ]);
+    inputOneNote.addEventListener('paste', e => {
+        console.log(e);
+        console.log(e.clipboardData.getData(htmltext));
+    })
 }
 
 function hideMessages() {
     msgOneNoteCopied.style.visibility = 'hidden';
     msgHtmlCopied.style.visibility = 'hidden';
+    msgOneNoteSeparated.style.visibility = 'hidden';
 }
 
 function init(tab) {

@@ -43,6 +43,7 @@ function navigateToUrl(url) {
         chrome.tabs.update(tab.id, {url});
     });
 }
+
 function currentTab(cb) {
     chrome.tabs.query({
         active: true,
@@ -52,4 +53,8 @@ function currentTab(cb) {
     });
 }
 
-export {getSeconds, getTime, navigateToUrl, currentTab}
+function sepLines(s) {
+    return s.replace(/<a class="yt-/g, '<br><a class="yt-');
+}
+
+export {getSeconds, getTime, navigateToUrl, currentTab, sepLines}

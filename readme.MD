@@ -3,7 +3,7 @@ https://youtu.be/0r786YiL92Y?t=35
 of
 https://www.youtube.com/watch?v=0r786YiL92Y&t=32s
 
-voorbeeld timetable in descrtiption:
+voorbeeld timetable in description:
 https://www.youtube.com/watch?v=U5SOD-eeK50&t=54s
 
 00:00 - Intro

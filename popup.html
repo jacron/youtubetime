@@ -1,12 +1,21 @@
 <!DOCTYPE html>
-<html>
+<html lang="en">
 <head>
     <link rel="stylesheet" href="styles.css">
+    <title>youtubetime</title>
 </head>
 <body>
     <p>
         Create YouTube links for OneNote
     </p>
+    <p>
+        <button id="buttonPasteHtml">paste html</button>
+        <label for="htmlspecimen">html specimen</label>
+    <div id="htmlspecimen"></div>
+    <button id="buttonCopyHtml">copy htmlspecimen for one note</button>
+    <span class="msg" id="msgHtmlCopied">copied!</span>
+    </p>
+    <hr>
     <p>
         <label for="inputUrl">url</label>
         <input id="inputUrl">
@@ -29,7 +38,7 @@
     <p>
         <button id="buttonGo">go!</button>
         <button id="buttonCopy">copy html with time</button>
-        <span class="msg" id="msgHtmlCopied">copied!</span>
+        <span class="msg" id="msgHtmlGone">copied!</span>
     </p>
     <p>
         <label for="inputSubject">subject</label>
@@ -37,7 +46,7 @@
     </p>
     <p>
         <button id="buttonOneNote">make one note</button>
-        <button id="buttonPasteHtml">paste html</button>
+<!--        <button id="buttonPasteHtml">paste html</button>-->
         <button id="buttonSpanToDiv">separate lines</button>
         <span class="msg" id="msgOneNoteSeparated">separated!</span>
     </p>
@@ -49,7 +58,6 @@
         <button id="buttonCopyOneNote">copy html one note</button>
         <span class="msg" id="msgOneNoteCopied">copied!</span>
     </p>
-
     <script type="module" src="popup.js"></script>
 </body>
 </html>

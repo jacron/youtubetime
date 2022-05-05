@@ -11,3 +11,7 @@ textarea {
     width: 97%;
     height: 100px;
 }
+#htmlspecimen {
+    background: burlywood;
+    padding: 6px;
+}

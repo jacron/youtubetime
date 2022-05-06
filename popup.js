@@ -1,45 +1,87 @@
-import {currentTab, getSeconds, getTime, navigateToUrl, sepLines} from "./lib.js";
-import {bindToClick, bindToEnterKey} from "./bind.js";
+import {adjustToOneNote, copyToHtml, currentTab, getSeconds, getTime, navigateToUrl, reformatTime} from "./lib.js";
+import {bindToChange, bindToClick, bindToEnterKey} from "./bind.js";
 
 const inputUrl = document.getElementById('inputUrl');
+const inputTitle = document.getElementById('inputTitle');
 const inputTime = document.getElementById('inputTime');
-const inputHtml = document.getElementById('inputHtml');
-const inputOneNote = document.getElementById('inputOneNote');
+const inputUrlWithTime = document.getElementById('inputUrlWithTime');
 const inputSubject = document.getElementById('inputSubject');
 
-const buttonHtml = document.getElementById('buttonHtml');
+const buttonWithTime = document.getElementById('buttonWithTime');
 const buttonGo = document.getElementById('buttonGo');
-const buttonTime = document.getElementById('buttonTime');
-const buttonCopy = document.getElementById('buttonCopy');
-const buttonOneNote = document.getElementById('buttonOneNote');
+const buttonMakeTime = document.getElementById('buttonMakeTime');
 const buttonCopyOneNote = document.getElementById('buttonCopyOneNote');
-const buttonPaste = document.getElementById('buttonPaste');
-const buttonSpanToDiv = document.getElementById('buttonSpanToDiv');
-const buttonPasteHtml = document.getElementById('buttonPasteHtml');
-const buttonCopyHtml = document.getElementById('buttonCopyHtml');
+const buttonAdjustClipboard = document.getElementById('buttonAdjustClipboard');
 
-const msgHtmlCopied = document.getElementById('msgHtmlCopied');
 const msgOneNoteCopied = document.getElementById('msgOneNoteCopied');
-const msgOneNoteSeparated = document.getElementById('msgOneNoteSeparated');
 const msgHtmlGone = document.getElementById('msgHtmlGone');
-const htmlSpecimen = document.getElementById('htmlspecimen');
+const msgClipboardAdjusted = document.getElementById('msgClipboardAdjusted');
 
-const type_texthtml = "text/html";
-
-function adjustToOneNote(text) {
-    return text.replace(/<a class="yt-simple-endpoint/g,
-        '<br><a class="yt-simple-endpoint');
+function makeOneNote() {
+    return  `
+<p style="margin:0;font-family:Calibri;font-size:12.0pt" lang="nl">
+<!--StartFragment-->
+<a href="${inputUrlWithTime.value}">${inputTime.value}</a> ${inputSubject.value}
+<!--EndFragment--></p>`;
 }
 
-function pasteHtml() {
-    inputOneNote.select();
+function makeTime() {
+    const pos = getTimeParmFromUrl();
+    if (pos !== -1) {
+        inputTime.value = getTime(inputUrl.value.substring(pos + 3));
+    }
+}
+
+function getTimeParmFromUrl() {
+    let pos = inputUrl.value.indexOf('&t=');
+    if (pos === -1) {
+        pos = inputUrl.value.indexOf('?t=');
+    }
+    return pos;
+}
+
+function urlWithTime() {
+    const urlValue = inputUrl.value;
+    const seconds = getSeconds(inputTime.value) + 's';
+    const pos = getTimeParmFromUrl();
+    if (pos !== -1) {
+        return urlValue.substring(0, pos + 3) + seconds;
+    } else {
+        const qpos = urlValue.indexOf('?');
+        if (qpos !== -1) {
+            return urlValue + '&t=' + seconds;
+        } else {
+            return urlValue + '?t=' + seconds;
+        }
+    }
+}
+
+function withTime() {
+    inputUrlWithTime.value = urlWithTime();
+    disableGo();
+}
+
+function copyOneNote() {
+    if (inputUrlWithTime.value.length > 0) {
+        copyToHtml(makeOneNote(), () => {
+            msgOneNoteCopied.style.visibility = 'visible';
+        });
+    }
+}
+
+function toUrl() {
+    navigateToUrl(inputUrlWithTime.value);
+}
+
+function adjustClipboard() {
     navigator.clipboard.read().then(content => {
         for (const item of content) {
-            if (item.types.includes(type_texthtml)) {
-                item.getType(type_texthtml).then(
+            if (item.types.includes('text/html')) {
+                item.getType('text/html').then(
                     blob => blob.text().then(
                         text => {
-                            htmlSpecimen.innerHTML = adjustToOneNote(text)
+                            copyToHtml(adjustToOneNote(text));
+                            msgClipboardAdjusted.style.visibility = 'visible';
                         }
                     )
                 )
@@ -48,119 +90,51 @@ function pasteHtml() {
     })
 }
 
-function makeTime() {
-    const pos = getTimeParm();
-    if (pos !== -1) {
-        inputTime.value = getTime(inputUrl.value.substring(pos + 3));
-    }
-}
-
-function getTimeParm() {
-    let pos = inputUrl.value.indexOf('&t=');
-    if (pos === -1) {
-        pos = inputUrl.value.indexOf('?t=');
-    }
-    return pos;
-}
-
-function makeHtml() {
-    const pos = getTimeParm();
-    if (pos !== -1) {
-        inputHtml.value = inputUrl.value.substring(0, pos + 3) +
-            getSeconds(inputTime.value) + 's';
+function disableMakeTime() {
+    if (inputUrl.value.indexOf('t=') === -1) {
+        buttonMakeTime.setAttribute('disabled', 'disabled');
     } else {
-        inputHtml.value = '';
+        buttonMakeTime.removeAttribute('disabled');
     }
 }
 
-function makeOneNote() {
-    inputOneNote.value  = `
-<p style="margin:0;font-family:Calibri;font-size:12.0pt" lang="nl">
-<!--StartFragment-->
-<a href="${inputHtml.value}">${inputTime.value}</a> ${inputSubject.value}
-<!--EndFragment--></p>`;
-}
-
-function copyToHtml(html, cb) {
-    const blob = new Blob([html], {type: type_texthtml});
-    const item = new ClipboardItem({
-        [type_texthtml]: blob,
-    });
-    navigator.clipboard.write([item]).then(cb);
-}
-
-function copyOneNote() {
-    if (inputOneNote.value.length > 0) {
-        copyToHtml(inputOneNote.value, () => {
-            msgOneNoteCopied.style.visibility = 'visible';
-            msgHtmlCopied.style.visibility = 'hidden';
-        });
+function disableGo() {
+    if (inputUrlWithTime.value.length === 0) {
+        buttonGo.setAttribute('disabled', 'disabled');
+        buttonCopyOneNote.setAttribute('disabled', 'disabled');
+    } else {
+        buttonGo.removeAttribute('disabled');
+        buttonCopyOneNote.removeAttribute('disabled');
     }
 }
 
-function copyHtml() {
-    if (inputHtml.value.length > 0) {
-        copyToHtml(inputHtml.value, () => {
-            msgHtmlCopied.style.visibility = 'visible';
-            msgOneNoteCopied.style.visibility = 'hidden';
-        });
-    }
-}
-
-function copyHtmlSpecimen() {
-    if (htmlSpecimen.innerHTML.length > 0) {
-        copyToHtml(htmlSpecimen.innerHTML, () => {
-            msgHtmlCopied.style.visibility = 'visible';
-        })
-    }
-}
-
-function toUrl() {
-    navigateToUrl(inputHtml.value);
-}
-
-function pasteUrl() {
-    inputUrl.select();
-    document.execCommand('paste');
-}
-
-function spanToDiv() {
-    if (inputOneNote.value.length > 0 &&
-        inputOneNote.value.indexOf('<a class="yt-') !== -1) {
-        inputOneNote.value = sepLines(inputOneNote.value);
-        msgOneNoteSeparated.style.visibility = 'visible';
-    }
+function tidyTime() {
+    inputTime.value = reformatTime(inputTime.value);
 }
 
 function bind() {
     bindToClick([
-        [buttonHtml, makeHtml],
+        [buttonWithTime, withTime],
         [buttonGo, toUrl],
-        [buttonTime, makeTime],
-        [buttonCopy, copyHtml],
-        [buttonOneNote, makeOneNote],
+        [buttonMakeTime, makeTime],
         [buttonCopyOneNote, copyOneNote],
-        [buttonPaste, pasteUrl],
-        [buttonSpanToDiv, spanToDiv],
-        [buttonPasteHtml, pasteHtml],
-        [buttonCopyHtml, copyHtmlSpecimen]
+        [buttonAdjustClipboard, adjustClipboard]
+    ]);
+    bindToChange([
+        [inputUrl, disableMakeTime],
+        [inputUrlWithTime, disableGo],
+        [inputTime, tidyTime]
     ])
     bindToEnterKey([
         [inputUrl, makeTime],
-        [inputTime, makeHtml],
-        [inputHtml, toUrl]
+        [inputTime, withTime],
     ]);
-    inputOneNote.addEventListener('paste', e => {
-        console.log(e);
-        console.log(e.clipboardData.getData(type_texthtml));
-    })
 }
 
 function hideMessages() {
     msgOneNoteCopied.style.visibility = 'hidden';
-    msgHtmlCopied.style.visibility = 'hidden';
-    msgOneNoteSeparated.style.visibility = 'hidden';
     msgHtmlGone.style.visibility = 'hidden';
+    msgClipboardAdjusted.style.visibility = 'hidden';
 }
 
 function init(tab) {
@@ -168,8 +142,13 @@ function init(tab) {
     hideMessages();
     if (tab) {
         inputUrl.value = tab.url;
+        inputTitle.value = tab.title;
         makeTime();
+    } else {
+        inputUrl.value = 'https://www.youtube.com/watch?v=FRyE7kN0rlk'; // testing
     }
+    disableMakeTime();
+    disableGo();
 }
 
 document.addEventListener('DOMContentLoaded', function () {
@@ -178,3 +157,4 @@ document.addEventListener('DOMContentLoaded', function () {
 
 // standalone
 init();
+

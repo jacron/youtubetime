@@ -2,18 +2,26 @@
   "name": "YouTubeTimes",
   "description": "Create shortcut for timed entry, or shortcuts to timed entries on a YouTube page",
   "version": "1.0",
-  "manifest_version": 3,
+  "manifest_version": 2,
   "background": {
-    "service_worker": "background.js"
+    "scripts": ["background.js"],
+    "persistent": false
   },
   "permissions": [
+    "contextMenus",
     "storage",
     "activeTab",
     "scripting",
     "clipboardRead",
-    "clipboardWrite"
+    "clipboardWrite",
+    "tabs"
   ],
-  "action": {
+  "content_scripts": [
+    {
+      "matches" : ["https://www.youtube.com/*"],
+      "js": ["content.js"]
+    }],
+  "browser_action": {
     "matches": ["https://*.youtube.com/*"],
     "default_popup": "popup.html",
     "default_icon": {

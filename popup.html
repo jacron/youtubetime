@@ -5,54 +5,45 @@
     <title>youtubetime</title>
 </head>
 <body>
-    <p>
-        Create YouTube links for OneNote
+    <p class="header">
+        Adjust copied YouTube time-table for OneNote
     </p>
     <p>
-        <button id="buttonPasteHtml">paste html</button>
-        <label for="htmlspecimen">html specimen</label>
-    <div id="htmlspecimen"></div>
-    <button id="buttonCopyHtml">copy htmlspecimen for one note</button>
-    <span class="msg" id="msgHtmlCopied">copied!</span>
+        <button id="buttonAdjustClipboard">adjust clipboard for onenote</button>
+        <span class="msg" id="msgClipboardAdjusted">adjusted!</span>
     </p>
-    <hr>
+    <p class="header">
+        Create OneNote time reference to youtube
+    </p>
     <p>
         <label for="inputUrl">url</label>
         <input id="inputUrl">
     </p>
     <p>
-        <button id="buttonTime">make time</button>
-        <button id="buttonPaste">paste url</button>
+        <label for="inputTitle">title</label>
+        <input id="inputTitle">
+    </p>
+    <p>
+        <button id="buttonMakeTime">make time</button>
     </p>
     <p>
         <label for="inputTime">time</label>
         <input id="inputTime">
     </p>
     <p>
-        <button id="buttonHtml">with time</button>
+        <button id="buttonWithTime">with time</button>
     </p>
     <p>
-        <label for="inputHtml">url with time</label>
-        <input id="inputHtml">
+        <label for="inputUrlWithTime">url with time</label>
+        <input id="inputUrlWithTime">
     </p>
     <p>
         <button id="buttonGo">go!</button>
-        <button id="buttonCopy">copy html with time</button>
         <span class="msg" id="msgHtmlGone">copied!</span>
     </p>
     <p>
         <label for="inputSubject">subject</label>
         <input id="inputSubject">
-    </p>
-    <p>
-        <button id="buttonOneNote">make one note</button>
-<!--        <button id="buttonPasteHtml">paste html</button>-->
-        <button id="buttonSpanToDiv">separate lines</button>
-        <span class="msg" id="msgOneNoteSeparated">separated!</span>
-    </p>
-    <p>
-        <label for="inputOneNote">html one note</label>
-        <textarea id="inputOneNote"></textarea>
     </p>
     <p>
         <button id="buttonCopyOneNote">copy html one note</button>

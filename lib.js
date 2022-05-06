@@ -1,4 +1,8 @@
 function getTime(seconds) {
+    const extra = seconds.indexOf('&');
+    if (extra !== -1) {
+        seconds = seconds.substring(0, extra);
+    }
     if (seconds.substring(seconds.length-1) === 's') {
         seconds = seconds.substring(0, seconds.length-1);
     }
@@ -53,8 +57,32 @@ function currentTab(cb) {
     });
 }
 
-function sepLines(s) {
-    return s.replace(/<a class="yt-/g, '<br><a class="yt-');
+function reformatTime(time) {
+    const parts = time.split(':');
+    if (parts.length < 2) {
+        return time;
+    }
+    for (let i = 1; i < parts.length; i++) {
+        if (parts[i].length === 1) {
+            parts[i] = '0' + parts[i];
+        }
+    }
+    return parts.join(':');
 }
 
-export {getSeconds, getTime, navigateToUrl, currentTab, sepLines}
+function copyToHtml(html, cb) {
+    const blob = new Blob([html], {type: 'text/html'});
+    const item = new ClipboardItem({
+        ['text/html']: blob,
+    });
+    navigator.clipboard.write([item]).then(cb);
+}
+
+function adjustToOneNote(text) {
+    return text.replace(/<a class="yt-simple-endpoint/g,
+        '<br><a class="yt-simple-endpoint');
+}
+
+
+export {getSeconds, getTime, navigateToUrl, currentTab,
+    reformatTime, copyToHtml, adjustToOneNote}

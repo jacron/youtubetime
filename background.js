@@ -1,21 +1,15 @@
-// function getClipboardData() {
-//     console.log('get clipb data...');
-//     navigator.clipboard.read().then(items => {
-//         console.log(items);
-//     })
-// }
-//
-// chrome.runtime.onMessage.addListener((req, sender, sendResponse) => {
-//     if (req.request) {
-//         switch(req.request) {
-//             case 'getClipboardData':
-//                 sendResponse({data: getClipboardData()})
-//                 break;
-//             default:
-//                 sendResponse('invalid request:' + req.request);
-//                 break;
-//         }
-//     } else {
-//         sendResponse('no request received');
-//     }
-// });
+chrome.contextMenus.create(
+    {
+        id: 'onenoteadjust',
+        title: `Adjust selection for OneNote`,
+        contexts: ["selection"],
+        documentUrlPatterns: [
+            "https://www.youtube.com/*"
+        ]
+    });
+
+chrome.contextMenus.onClicked.addListener((info, tab) => {
+    chrome.tabs.sendMessage(tab.id, {
+        notify: 'copy_requested'
+    }, (res) => console.log(res));
+});

@@ -6,9 +6,14 @@ function copyToHtml(html, cb) {
     navigator.clipboard.write([item]).then(cb);
 }
 
-function adjustToOneNote(text) {
-    return text.replace(/<a class="yt-simple-endpoint/g,
-        '<br><a class="yt-simple-endpoint');
+function adjustToOneNote(text, mode) {
+    switch (mode) {
+        case 1:
+            return text.replace(/<a class="yt-simple-endpoint/g,
+                '<br><a class="yt-simple-endpoint');
+        case 2:
+            return text.replace(/(<a class="yt-simple-endpoint.*\/a>)/g, '$&<br>');
+    }
 }
 
 getSelectionHTML = function (userSelection) {
@@ -19,16 +24,23 @@ getSelectionHTML = function (userSelection) {
     return div.innerHTML;
 };
 
-function adjustClipboard(rsp) {
+function adjustClipboard(rsp, mode) {
     const html = getSelectionHTML(window.getSelection());
-    copyToHtml(adjustToOneNote(html));
+    copyToHtml(adjustToOneNote(html, mode));
     rsp('list was adjusted');
 }
 
 function listener(req, snd, rsp) {
-    if (req.notify && req.notify === 'copy_requested') {
-        console.log('copy requested');
-        adjustClipboard(rsp);
+    if (req.notify) {
+        console.log(req.notify);
+        switch(req.notify) {
+            case 'copy_requested':
+                adjustClipboard(rsp, 1);
+                break;
+            case 'copy_requested_2':
+                adjustClipboard(rsp, 2);
+                break;
+        }
     }
 }
 chrome.runtime.onMessage.addListener(listener);

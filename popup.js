@@ -16,6 +16,7 @@ const buttonAdjustClipboard = document.getElementById('buttonAdjustClipboard');
 const msgOneNoteCopied = document.getElementById('msgOneNoteCopied');
 const msgHtmlGone = document.getElementById('msgHtmlGone');
 const msgClipboardAdjusted = document.getElementById('msgClipboardAdjusted');
+const msgClipboardNotAdjusted = document.getElementById('msgClipboardNotAdjusted');
 
 function makeOneNote() {
     return  `
@@ -73,19 +74,35 @@ function toUrl() {
     navigateToUrl(inputUrlWithTime.value);
 }
 
+function hide(element) {
+    element.style.visibility = 'hidden';
+}
+
+function show(element) {
+    element.style.visibility = 'visible';
+}
+
 function adjustClipboard() {
+    hideMessages();
     navigator.clipboard.read().then(content => {
+        let found = false;
         for (const item of content) {
             if (item.types.includes('text/html')) {
                 item.getType('text/html').then(
                     blob => blob.text().then(
                         text => {
                             copyToHtml(adjustToOneNote(text));
-                            msgClipboardAdjusted.style.visibility = 'visible';
+                            show(msgClipboardAdjusted);
+                            hide(msgClipboardNotAdjusted);
+                            found = true;
                         }
                     )
                 )
             }
+        }
+        if (!found) {
+            show(msgClipboardNotAdjusted);
+            hide(msgClipboardAdjusted);
         }
     })
 }
@@ -132,9 +149,14 @@ function bind() {
 }
 
 function hideMessages() {
-    msgOneNoteCopied.style.visibility = 'hidden';
-    msgHtmlGone.style.visibility = 'hidden';
-    msgClipboardAdjusted.style.visibility = 'hidden';
+    for (let element of [
+        msgClipboardNotAdjusted,
+        msgClipboardAdjusted,
+        msgOneNoteCopied,
+        msgHtmlGone
+    ]) {
+        hide(element);
+    }
 }
 
 function init(tab) {

@@ -1,46 +1,52 @@
-function copyToHtml(html, cb) {
-    const blob = new Blob([html], {type: 'text/html'});
-    const item = new ClipboardItem({
-        ['text/html']: blob,
-    });
-    navigator.clipboard.write([item]).then(cb);
-}
-
 function adjustToOneNote(text, mode) {
     switch (mode) {
-        case 1:
-            return text.replace(/<a class="yt-simple-endpoint/g,
+        case 'onenoteadjustLeading':
+            text = text.replace(/<a class="yt-simple-endpoint/g,
                 '<br><a class="yt-simple-endpoint');
-        case 2:
-            return text.replace(/(<a class="yt-simple-endpoint.*\/a>)/g, '$&<br>');
+            break;
+        case 'onenoteadjustTrailing':
+            text = text.replace(/(<a class="yt-simple-endpoint.*\/a>)/g, '$&<br>');
+            break;
+    }
+    if (text.indexOf('https://') !== -1) {
+        return text;
+    } else {
+        return text.replace(/\/watch\?/g, 'https://www.youtube.com/watch?');
     }
 }
 
 getSelectionHTML = function (userSelection) {
     const range = userSelection.getRangeAt(0);
     const clonedSelection = range.cloneContents ();
-    const div = document.createElement ('div');
-    div.appendChild (clonedSelection);
-    return div.innerHTML;
+    const appendedDiv = document.createElement ('div');
+    appendedDiv.appendChild (clonedSelection);
+    return appendedDiv.innerHTML;
 };
+
+async function copyToHtml(html) {
+    const blob = new Blob([html], {type: 'text/html'});
+    const item = new ClipboardItem({
+        ['text/html']: blob,
+    });
+    try {
+        await navigator.clipboard.write([item]);
+    } catch (err) {
+        console.error('Failed to copy: ', err);
+    }
+}
 
 function adjustClipboard(rsp, mode) {
     const html = getSelectionHTML(window.getSelection());
-    copyToHtml(adjustToOneNote(html, mode));
+    const adjusted = adjustToOneNote(html, mode);
+    // console.log(adjusted);
+    copyToHtml(adjusted).then();
     rsp('list was adjusted');
 }
 
 function listener(req, snd, rsp) {
     if (req.notify) {
-        console.log(req.notify);
-        switch(req.notify) {
-            case 'copy_requested':
-                adjustClipboard(rsp, 1);
-                break;
-            case 'copy_requested_2':
-                adjustClipboard(rsp, 2);
-                break;
-        }
+        // console.log(req.notify);
+        adjustClipboard(rsp, req.notify);
     }
 }
 chrome.runtime.onMessage.addListener(listener);

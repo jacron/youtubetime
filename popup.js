@@ -103,7 +103,7 @@ function bind() {
     bindToEnterKey([
         [inputUrl, makeTime],
         [inputTime, withTime],
-        // [inputSubject, copyOneNote]
+        [inputSubject, copyOneNote]
     ]);
 }
 

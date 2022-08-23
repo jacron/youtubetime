@@ -1,7 +1,7 @@
 function createContextMenu() {
     chrome.contextMenus.create(
         {
-            id: 'onenoteadjust',
+            id: 'onenoteadjustLeading',
             title: `Copy selection for OneNote (leading time stamp)`,
             contexts: ["selection"],
             documentUrlPatterns: [
@@ -10,7 +10,7 @@ function createContextMenu() {
         });
     chrome.contextMenus.create(
         {
-            id: 'onenoteadjust2',
+            id: 'onenoteadjustTrailing',
             title: `Copy selection for OneNote (trailing time stamp)`,
             contexts: ["selection"],
             documentUrlPatterns: [
@@ -20,18 +20,8 @@ function createContextMenu() {
 }
 
 function clickListener(info, tab) {
-    // console.log(info)
-    let notify = 'copy_requested';
-    switch (info.menuItemId) {
-        case 'onenoteadjust':
-            break;
-        case 'onenoteadjust2':
-            notify = 'copy_requested_2'
-            break;
-
-    }
     chrome.tabs.sendMessage(tab.id, {
-        notify
+        notify: info.menuItemId
     }, (res) => console.log(res));
 }
 

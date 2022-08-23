@@ -1,36 +1,39 @@
-import {copyToHtml, copyToText, currentTab, getSeconds, getTime, reformatTime} from "./lib.js";
-import {bindToChange, bindToClick, bindToEnterKey} from "./bind.js";
+import {copyToHtml, copyToText, currentTab, getSeconds} from "./lib.js";
+import {bindToClick} from "./bind.js";
 
 const inputUrl = document.getElementById('inputUrl');
-const inputTitle = document.getElementById('inputTitle');
-const inputTime = document.getElementById('inputTime');
-const spanUrlWithTime = document.getElementById('spanUrlWithTime');
-const inputSubject = document.getElementById('inputSubject');
+const pTitle = document.getElementById('pTitle');
+const textIndex = document.getElementById('textIndex')
 
-const buttonWithTime = document.getElementById('buttonWithTime');
 const buttonCopyOneNote = document.getElementById('buttonCopyOneNote');
 const buttonCopyToHtml = document.getElementById('buttonCopyToHtml');
 
 const msgOneNoteCopied = document.getElementById('msgOneNoteCopied');
 const msgTimeQuoteCopied = document.getElementById('msgTextCopied');
 
-function makeOneNote() {
-    return  `
+function makeOneNoteLine(t, subject) {
+    const url = urlWithTime(t);
+    return `
 <p style="margin:0;font-family:Calibri;font-size:12.0pt" lang="nl">
 <!--StartFragment-->
-<a href="${spanUrlWithTime.innerText}">${inputTime.value}</a> ${inputSubject.value}
-<!--EndFragment--></p>`;
+<a href="${url}">${t}</a> ${subject}
+<!--EndFragment--></p>
+`;
+
 }
 
-function makeTimeQuote() {
-    return inputTime.value + ' ' + inputSubject.value;
-}
-
-function makeTime() {
-    const pos = getTimeParmFromUrl();
-    if (pos !== -1) {
-        inputTime.value = getTime(inputUrl.value.substring(pos + 3));
+function makeOneNote(indexText) {
+    const lines = indexText.split('\n');
+    let html = '';
+    for (const line of lines) {
+        if (line.length > 0) {
+            const words = line.split(' ');
+            if (words.length > 1) {
+                html += makeOneNoteLine(words[0], words[1]);
+            }
+        }
     }
+    return html;
 }
 
 function getTimeParmFromUrl() {
@@ -41,9 +44,9 @@ function getTimeParmFromUrl() {
     return pos;
 }
 
-function urlWithTime() {
+function urlWithTime(time) {
     const urlValue = inputUrl.value;
-    const seconds = getSeconds(inputTime.value) + 's';
+    const seconds = getSeconds(time) + 's';
     const pos = getTimeParmFromUrl();
     if (pos !== -1) {
         return urlValue.substring(0, pos + 3) + seconds;
@@ -57,15 +60,10 @@ function urlWithTime() {
     }
 }
 
-function withTime() {
-    urlWithTime();
-    spanUrlWithTime.innerText = urlWithTime();
-    inputSubject.select();
-}
-
 function copyHtml() {
-    if (spanUrlWithTime.innerText.length > 0) {
-        copyToText(makeTimeQuote(), showCopiedTextMessage());
+    const indexText = textIndex.value;
+    if (indexText.length > 0) {
+        copyToText(indexText, showCopiedTextMessage);
     }
 }
 
@@ -78,8 +76,9 @@ function showCopiedTextMessage() {
 }
 
 function copyOneNote() {
-    if (spanUrlWithTime.innerText.length > 0) {
-        copyToHtml(makeOneNote(), showCopiedMessage);
+    const indexText = textIndex.value;
+    if (indexText.length > 0) {
+        copyToHtml(makeOneNote(indexText), showCopiedMessage);
     }
 }
 
@@ -87,23 +86,10 @@ function hide(element) {
     element.style.visibility = 'hidden';
 }
 
-function tidyTime() {
-    inputTime.value = reformatTime(inputTime.value);
-}
-
 function bind() {
     bindToClick([
-        [buttonWithTime, withTime],
         [buttonCopyOneNote, copyOneNote],
         [buttonCopyToHtml, copyHtml]
-    ]);
-    bindToChange([
-        [inputTime, tidyTime]
-    ])
-    bindToEnterKey([
-        [inputUrl, makeTime],
-        [inputTime, withTime],
-        [inputSubject, copyOneNote]
     ]);
 }
 
@@ -112,21 +98,22 @@ function hideMessages() {
     hide(msgTimeQuoteCopied);
 }
 
+function receiveActiveUrl(current) {
+    inputUrl.value = current.url;
+    pTitle.innerText = current.title;
+}
+
 function init(tab) {
+    chrome.runtime.sendMessage({
+        request: 'getActiveUrl'
+    }, receiveActiveUrl);
     bind();
     hideMessages();
-    if (tab) {
-        inputUrl.value = tab.url;
-        inputTitle.value = tab.title;
-        makeTime();
-        inputTime.select();
-    }
 }
 
 document.addEventListener('DOMContentLoaded', function () {
     currentTab((tab) => init(tab));
 });
 
-// standalone
 init();
 

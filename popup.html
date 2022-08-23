@@ -5,7 +5,7 @@
     <title>youtubetime</title>
 </head>
 <body>
-    <p class="header">
+    <p class="header" id="pTitle">
         Create OneNote time reference to youtube
     </p>
     <p>
@@ -13,26 +13,12 @@
         <input id="inputUrl">
     </p>
     <p>
-        <label for="inputTitle">title</label>
-        <input id="inputTitle">
+        <label for="textIndex">time-table</label>
+        <textarea id="textIndex"></textarea>
     </p>
     <p>
-        <label for="inputTime">time</label>
-        <input id="inputTime">
-    </p>
-    <p>
-        <button id="buttonWithTime">add time</button>
-    </p>
-    <p>
-        <span id="spanUrlWithTime"></span>
-    </p>
-    <p>
-        <label for="inputSubject">subject</label>
-        <input id="inputSubject">
-    </p>
-    <p>
-        <button id="buttonCopyOneNote">copy html one note</button>
-        <button id="buttonCopyToHtml">copy text for YouTube comment</button>
+        <button id="buttonCopyOneNote">copy to OneNote format</button>
+        <button id="buttonCopyToHtml">copy to YouTube comment</button>
         <span class="msg" id="msgOneNoteCopied">one note link copied!</span>
         <span class="msg" id="msgTextCopied">text copied!</span>
     </p>

@@ -38,16 +38,6 @@ function getSeconds(time) {
     return seconds;
 }
 
-function navigateToUrl(url) {
-    chrome.tabs.query({
-        active: true,
-        lastFocusedWindow: true
-    }, function(tabs) {
-        const tab = tabs[0];
-        chrome.tabs.update(tab.id, {url});
-    });
-}
-
 function currentTab(cb) {
     chrome.tabs.query({
         active: true,
@@ -78,11 +68,12 @@ function copyToHtml(html, cb) {
     navigator.clipboard.write([item]).then(cb);
 }
 
-function adjustToOneNote(text) {
-    return text.replace(/<a class="yt-simple-endpoint/g,
-        '<br><a class="yt-simple-endpoint');
+function copyToText(text, cb) {
+    const blob = new Blob([text], {type: 'text/plain'});
+    const item = new ClipboardItem({
+        ['text/plain']: blob,
+    });
+    navigator.clipboard.write([item]).then(cb);
 }
 
-
-export {getSeconds, getTime, navigateToUrl, currentTab,
-    reformatTime, copyToHtml, adjustToOneNote}
+export {getSeconds, getTime, currentTab, reformatTime, copyToHtml, copyToText}

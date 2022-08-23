@@ -6,14 +6,6 @@
 </head>
 <body>
     <p class="header">
-        Adjust copied YouTube time-table for OneNote
-    </p>
-    <p>
-        <button id="buttonAdjustClipboard">adjust clipboard for onenote</button>
-        <span class="msg" id="msgClipboardAdjusted">adjusted!</span>
-        <span class="msg" id="msgClipboardNotAdjusted">could not adjust the clipboard</span>
-    </p>
-    <p class="header">
         Create OneNote time reference to youtube
     </p>
     <p>
@@ -25,22 +17,14 @@
         <input id="inputTitle">
     </p>
     <p>
-        <button id="buttonMakeTime">make time</button>
-    </p>
-    <p>
         <label for="inputTime">time</label>
         <input id="inputTime">
     </p>
     <p>
-        <button id="buttonWithTime">with time</button>
+        <button id="buttonWithTime">add time</button>
     </p>
     <p>
-        <label for="inputUrlWithTime">url with time</label>
-        <input id="inputUrlWithTime">
-    </p>
-    <p>
-        <button id="buttonGo">go!</button>
-        <span class="msg" id="msgHtmlGone">copied!</span>
+        <span id="spanUrlWithTime"></span>
     </p>
     <p>
         <label for="inputSubject">subject</label>
@@ -48,7 +32,9 @@
     </p>
     <p>
         <button id="buttonCopyOneNote">copy html one note</button>
-        <span class="msg" id="msgOneNoteCopied">copied!</span>
+        <button id="buttonCopyToHtml">copy text for YouTube comment</button>
+        <span class="msg" id="msgOneNoteCopied">one note link copied!</span>
+        <span class="msg" id="msgTextCopied">text copied!</span>
     </p>
     <script type="module" src="popup.js"></script>
 </body>

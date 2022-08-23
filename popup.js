@@ -1,29 +1,29 @@
-import {adjustToOneNote, copyToHtml, currentTab, getSeconds, getTime, navigateToUrl, reformatTime} from "./lib.js";
+import {copyToHtml, copyToText, currentTab, getSeconds, getTime, reformatTime} from "./lib.js";
 import {bindToChange, bindToClick, bindToEnterKey} from "./bind.js";
 
 const inputUrl = document.getElementById('inputUrl');
 const inputTitle = document.getElementById('inputTitle');
 const inputTime = document.getElementById('inputTime');
-const inputUrlWithTime = document.getElementById('inputUrlWithTime');
+const spanUrlWithTime = document.getElementById('spanUrlWithTime');
 const inputSubject = document.getElementById('inputSubject');
 
 const buttonWithTime = document.getElementById('buttonWithTime');
-const buttonGo = document.getElementById('buttonGo');
-const buttonMakeTime = document.getElementById('buttonMakeTime');
 const buttonCopyOneNote = document.getElementById('buttonCopyOneNote');
-const buttonAdjustClipboard = document.getElementById('buttonAdjustClipboard');
+const buttonCopyToHtml = document.getElementById('buttonCopyToHtml');
 
 const msgOneNoteCopied = document.getElementById('msgOneNoteCopied');
-const msgHtmlGone = document.getElementById('msgHtmlGone');
-const msgClipboardAdjusted = document.getElementById('msgClipboardAdjusted');
-const msgClipboardNotAdjusted = document.getElementById('msgClipboardNotAdjusted');
+const msgTimeQuoteCopied = document.getElementById('msgTextCopied');
 
 function makeOneNote() {
     return  `
 <p style="margin:0;font-family:Calibri;font-size:12.0pt" lang="nl">
 <!--StartFragment-->
-<a href="${inputUrlWithTime.value}">${inputTime.value}</a> ${inputSubject.value}
+<a href="${spanUrlWithTime.innerText}">${inputTime.value}</a> ${inputSubject.value}
 <!--EndFragment--></p>`;
+}
+
+function makeTimeQuote() {
+    return inputTime.value + ' ' + inputSubject.value;
 }
 
 function makeTime() {
@@ -58,71 +58,33 @@ function urlWithTime() {
 }
 
 function withTime() {
-    inputUrlWithTime.value = urlWithTime();
-    disableGo();
+    urlWithTime();
+    spanUrlWithTime.innerText = urlWithTime();
+    inputSubject.select();
 }
 
-function copyOneNote() {
-    if (inputUrlWithTime.value.length > 0) {
-        copyToHtml(makeOneNote(), () => {
-            msgOneNoteCopied.style.visibility = 'visible';
-        });
+function copyHtml() {
+    if (spanUrlWithTime.innerText.length > 0) {
+        copyToText(makeTimeQuote(), showCopiedTextMessage());
     }
 }
 
-function toUrl() {
-    navigateToUrl(inputUrlWithTime.value);
+function showCopiedMessage() {
+    msgOneNoteCopied.style.visibility = 'visible';
+}
+
+function showCopiedTextMessage() {
+    msgTimeQuoteCopied.style.visibility = 'visible';
+}
+
+function copyOneNote() {
+    if (spanUrlWithTime.innerText.length > 0) {
+        copyToHtml(makeOneNote(), showCopiedMessage);
+    }
 }
 
 function hide(element) {
     element.style.visibility = 'hidden';
-}
-
-function show(element) {
-    element.style.visibility = 'visible';
-}
-
-function adjustClipboard() {
-    hideMessages();
-    navigator.clipboard.read().then(content => {
-        let found = false;
-        for (const item of content) {
-            if (item.types.includes('text/html')) {
-                item.getType('text/html').then(
-                    blob => blob.text().then(
-                        text => {
-                            copyToHtml(adjustToOneNote(text));
-                            show(msgClipboardAdjusted);
-                            hide(msgClipboardNotAdjusted);
-                            found = true;
-                        }
-                    )
-                )
-            }
-        }
-        if (!found) {
-            show(msgClipboardNotAdjusted);
-            hide(msgClipboardAdjusted);
-        }
-    })
-}
-
-function disableMakeTime() {
-    if (inputUrl.value.indexOf('t=') === -1) {
-        buttonMakeTime.setAttribute('disabled', 'disabled');
-    } else {
-        buttonMakeTime.removeAttribute('disabled');
-    }
-}
-
-function disableGo() {
-    if (inputUrlWithTime.value.length === 0) {
-        buttonGo.setAttribute('disabled', 'disabled');
-        buttonCopyOneNote.setAttribute('disabled', 'disabled');
-    } else {
-        buttonGo.removeAttribute('disabled');
-        buttonCopyOneNote.removeAttribute('disabled');
-    }
 }
 
 function tidyTime() {
@@ -132,31 +94,22 @@ function tidyTime() {
 function bind() {
     bindToClick([
         [buttonWithTime, withTime],
-        [buttonGo, toUrl],
-        [buttonMakeTime, makeTime],
         [buttonCopyOneNote, copyOneNote],
-        [buttonAdjustClipboard, adjustClipboard]
+        [buttonCopyToHtml, copyHtml]
     ]);
     bindToChange([
-        [inputUrl, disableMakeTime],
-        [inputUrlWithTime, disableGo],
         [inputTime, tidyTime]
     ])
     bindToEnterKey([
         [inputUrl, makeTime],
         [inputTime, withTime],
+        // [inputSubject, copyOneNote]
     ]);
 }
 
 function hideMessages() {
-    for (let element of [
-        msgClipboardNotAdjusted,
-        msgClipboardAdjusted,
-        msgOneNoteCopied,
-        msgHtmlGone
-    ]) {
-        hide(element);
-    }
+    hide(msgOneNoteCopied);
+    hide(msgTimeQuoteCopied);
 }
 
 function init(tab) {
@@ -166,11 +119,8 @@ function init(tab) {
         inputUrl.value = tab.url;
         inputTitle.value = tab.title;
         makeTime();
-    } else {
-        inputUrl.value = 'https://www.youtube.com/watch?v=FRyE7kN0rlk'; // testing
+        inputTime.select();
     }
-    disableMakeTime();
-    disableGo();
 }
 
 document.addEventListener('DOMContentLoaded', function () {

@@ -1,5 +1,6 @@
 let actionWinId = null;
 let current = {};
+let lastActiveTabId = null;
 
 function createContextMenus() {
     chrome.contextMenus.create(
@@ -32,31 +33,40 @@ function initView() {
     chrome.windows.create({
         url: 'popup.html',
         type: 'popup',
-        width: 660,
+        width: 610,
         height: 400
-    }, win => {
-        actionWinId = win.id;
-    })
+    }, win => actionWinId = win.id)
+}
+
+function closeView() {
+    if (actionWinId) {
+        chrome.windows.remove(actionWinId,
+            () => actionWinId = null);
+    }
 }
 
 function actionListener() {
     if (actionWinId === null) {
         queryActiveTab();
+    } else {
+        closeView();
     }
 }
 
-function queryActiveTab(sendResponse) {
+function onQuery(tabs) {
+    if (tabs[0]) {
+        const {url, title} = tabs[0];
+        current.url = url;
+        current.title = title;
+        initView();
+    }
+}
+
+function queryActiveTab() {
     chrome.tabs.query({
         active: true,
         lastFocusedWindow: true
-    }, function (tabs) {
-        if (tabs[0]) {
-            const {url, title} = tabs[0];
-            current.url = url;
-            current.title = title;
-            initView();
-        }
-    });
+    }, onQuery);
 }
 
 function listenClientRequest(req, sender, sendResponse) {
@@ -75,11 +85,11 @@ function onRemoval(windowId) {
 }
 
 function queryListener(tabs) {
-    // set badge text to 'time' if on youtube.com
+    // set badge text to 'time' if on YouTube.com, watching a video
     if (tabs[0]) {
         const {url, id} = tabs[0];
         let text = '';
-        if (url.indexOf("youtube.com") !== -1) {
+        if (url.indexOf("youtube.com/watch?") !== -1) {
             chrome.browserAction.enable(id);
             text = 'time';
         }
@@ -90,11 +100,19 @@ function queryListener(tabs) {
     }
 }
 
-function activationListener() {
+function activationListener(activeInfo) {
+    if (activeInfo && activeInfo.tabId !== lastActiveTabId) {
+        closeView();
+    }
     chrome.tabs.query({
         active: true,
         lastFocusedWindow: true
     }, queryListener);
+}
+
+function updateListener(tabId) {
+    lastActiveTabId = tabId;
+    activationListener();
 }
 
 chrome.runtime.onInstalled.addListener(createContextMenus)
@@ -103,3 +121,4 @@ chrome.contextMenus.onClicked.addListener(contextMenuClickListener);
 chrome.browserAction.onClicked.addListener(actionListener);
 chrome.windows.onRemoved.addListener(onRemoval);
 chrome.tabs.onActivated.addListener(activationListener);
+chrome.tabs.onUpdated.addListener(updateListener);

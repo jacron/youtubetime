@@ -22,7 +22,7 @@
       "js": ["content.js"]
     }],
   "browser_action": {
-    "matches": ["*.youtube.com/*"],
+    "matches": ["https://www.youtube.com/watch?*"],
     "default_icon": {
       "16": "/images/get_started16.png",
       "32": "/images/get_started32.png",

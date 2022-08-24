@@ -71,6 +71,30 @@ function onRemoval(windowId) {
     if (windowId === actionWinId) {
         actionWinId = null;
     }
+    activationListener();
+}
+
+function queryListener(tabs) {
+    // set badge text to 'time' if on youtube.com
+    if (tabs[0]) {
+        const {url, id} = tabs[0];
+        let text = '';
+        if (url.indexOf("youtube.com") !== -1) {
+            chrome.browserAction.enable(id);
+            text = 'time';
+        }
+        else {
+            chrome.browserAction.disable(id);
+        }
+        chrome.browserAction.setBadgeText({text});
+    }
+}
+
+function activationListener() {
+    chrome.tabs.query({
+        active: true,
+        lastFocusedWindow: true
+    }, queryListener);
 }
 
 chrome.runtime.onInstalled.addListener(createContextMenus)
@@ -78,3 +102,4 @@ chrome.runtime.onMessage.addListener(listenClientRequest);
 chrome.contextMenus.onClicked.addListener(contextMenuClickListener);
 chrome.browserAction.onClicked.addListener(actionListener);
 chrome.windows.onRemoved.addListener(onRemoval);
+chrome.tabs.onActivated.addListener(activationListener);

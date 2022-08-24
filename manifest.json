@@ -13,7 +13,6 @@
     "storage",
     "activeTab",
     "scripting",
-    "clipboardRead",
     "clipboardWrite",
     "tabs"
   ],
@@ -23,7 +22,7 @@
       "js": ["content.js"]
     }],
   "browser_action": {
-    "matches": ["https://*.youtube.com/*"],
+    "matches": ["*.youtube.com/*"],
     "default_icon": {
       "16": "/images/get_started16.png",
       "32": "/images/get_started32.png",

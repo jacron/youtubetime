@@ -29,7 +29,9 @@ function makeOneNote(indexText) {
         if (line.length > 0) {
             const words = line.split(' ');
             if (words.length > 1) {
-                html += makeOneNoteLine(words[0], words[1]);
+                const time = words[0];
+                words.shift();
+                html += makeOneNoteLine(time, words.join(' '));
             }
         }
     }

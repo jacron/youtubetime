@@ -1,21 +1,13 @@
 let actionWinId = null;
 let current = {};
 let lastActiveTabId = null;
+const NOTIFY_ADJUST = 'onenoteadjustclipboard';
 
 function createContextMenus() {
     chrome.contextMenus.create(
         {
-            id: 'onenoteadjustLeading',
-            title: `Copy selection for OneNote (leading time stamp)`,
-            contexts: ["selection"],
-            documentUrlPatterns: [
-                "https://www.youtube.com/*"
-            ]
-        });
-    chrome.contextMenus.create(
-        {
-            id: 'onenoteadjustTrailing',
-            title: `Copy selection for OneNote (trailing time stamp)`,
+            id: 'onenoteadjusttable',
+            title: `Copy selection for OneNote`,
             contexts: ["selection"],
             documentUrlPatterns: [
                 "https://www.youtube.com/*"
@@ -23,9 +15,16 @@ function createContextMenus() {
         });
 }
 
+/**
+ * notify client (content.js) with onenoteadjusttable
+ * @param info
+ * @param tab
+ */
 function contextMenuClickListener(info, tab) {
+    // console.log(info);
     chrome.tabs.sendMessage(tab.id, {
-        notify: info.menuItemId
+        notify: NOTIFY_ADJUST,
+        text: info.selectionText
     }, (res) => console.log(res));
 }
 

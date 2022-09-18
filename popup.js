@@ -5,9 +5,12 @@ const inputUrl = document.getElementById('inputUrl');
 const pTitle = document.getElementById('pTitle');
 const textIndex = document.getElementById('textIndex')
 
+const buttonCopyCode = document.getElementById('buttonCopyCode');
 const buttonCopyOneNote = document.getElementById('buttonCopyOneNote');
 const buttonCopyToHtml = document.getElementById('buttonCopyToHtml');
 
+const msgCode = document.getElementById('msgCode');
+const msgCodeCopied = document.getElementById('msgCodeCopied');
 const msgOneNoteCopied = document.getElementById('msgOneNoteCopied');
 const msgTimeQuoteCopied = document.getElementById('msgTextCopied');
 
@@ -62,11 +65,15 @@ function urlWithTime(time) {
     }
 }
 
-function copyHtml() {
+function copyText() {
     const indexText = textIndex.value;
     if (indexText.length > 0) {
         copyToText(indexText, showCopiedTextMessage);
     }
+}
+
+function show(element) {
+    element.style.visibility = 'visible';
 }
 
 function showCopiedMessage() {
@@ -77,8 +84,24 @@ function showCopiedTextMessage() {
     msgTimeQuoteCopied.style.visibility = 'visible';
 }
 
+function showCopiedCodeMessage(code) {
+    show(msgCodeCopied);
+    msgCode.innerText = code;
+    show(msgCode);
+}
+
+function codeFromUrl() {
+    const regex = /\/watch\?v=(.*)&/;
+    return inputUrl.value.match(regex)[1];
+}
+
+function copyCode() {
+    const code = codeFromUrl();
+    copyToText(code, () => showCopiedCodeMessage(code));
+}
+
 function copyOneNote() {
-    const indexText = textIndex.value;
+    const indexText = textIndex.value;  // content of the textarea (time-table)
     if (indexText.length > 0) {
         copyToHtml(makeOneNote(indexText), showCopiedMessage);
     }
@@ -90,14 +113,17 @@ function hide(element) {
 
 function bind() {
     bindToClick([
+        [buttonCopyCode, copyCode],
         [buttonCopyOneNote, copyOneNote],
-        [buttonCopyToHtml, copyHtml]
+        [buttonCopyToHtml, copyText]
     ]);
 }
 
 function hideMessages() {
     hide(msgOneNoteCopied);
     hide(msgTimeQuoteCopied);
+    hide(msgCodeCopied);
+    hide(msgCode);
 }
 
 function receiveActiveUrl(current) {
@@ -105,7 +131,7 @@ function receiveActiveUrl(current) {
     pTitle.innerText = current.title;
 }
 
-function init(tab) {
+function init() {
     chrome.runtime.sendMessage({
         request: 'getActiveUrl'
     }, receiveActiveUrl);

@@ -6,9 +6,10 @@ const pTitle = document.getElementById('pTitle');
 const textIndex = document.getElementById('textIndex')
 const links = document.getElementById('links');
 
-const buttonCopyCode = document.getElementById('buttonCopyCode');
+// const buttonCopyCode = document.getElementById('buttonCopyCode');
 const buttonCopyOneNote = document.getElementById('buttonCopyOneNote');
 const buttonCopyToHtml = document.getElementById('buttonCopyToHtml');
+const buttonSave = document.getElementById('buttonSave');
 
 const msgCode = document.getElementById('msgCode');
 const msgCodeCopied = document.getElementById('msgCodeCopied');
@@ -68,7 +69,7 @@ function showCopiedCodeMessage(code) {
 }
 
 function codeFromUrl() {
-    const regex = /\/watch\?v=(.*)&/;
+    const regex = /\/watch\?v=(.*?)&/;  // non greedy
     return inputUrl.value.match(regex)[1];
 }
 
@@ -84,15 +85,27 @@ function copyOneNote() {
     }
 }
 
+const KEY_TIMETABLE = 'youtubeTimeTable';
+
+function save() {
+    const indexText = textIndex.value;  // content of the textarea (time-table)
+    console.log(indexText);
+    const code = codeFromUrl();
+    chrome.storage.sync.set({[code]: indexText});
+    // localStorage.setItem(KEY_TIMETABLE, indexText);
+
+}
+
 function hide(element) {
     element.style.visibility = 'hidden';
 }
 
 function bind() {
     bindToClick([
-        [buttonCopyCode, copyCode],
+        // [buttonCopyCode, copyCode],
         [buttonCopyOneNote, copyOneNote],
         [buttonCopyToHtml, copyText],
+        [buttonSave, save],
         [document, linkClick]
     ]);
     bindToAnyKey([
@@ -110,27 +123,30 @@ function hideMessages() {
 function receiveActiveUrl(current) {
     inputUrl.value = current.url;
     pTitle.innerText = current.title;
+    const code = codeFromUrl();
+    console.log(code);
+    chrome.storage.sync.get(code, items => {
+        console.log(items)
+        textIndex.value = items[code];
+    });
+}
+
+function makeLink(row) {
+    return `
+<div>
+    <a class="link" data-time="${row.time}">${row.time}</a>&nbsp;${row.text}
+</div>
+`;
 }
 
 /*
 de link in de popup naar youtube with time
-moet in de actuele pagina de locatie veranderen
-wat via background en messaging zal moeten gaan
+zal in de actuele pagina de locatie veranderen
+via het background script
  */
-function makeLink(row) {
-    const url = googleUrlWithTime(row.time, inputUrl.value);
-    return `
-    <div>
-<!--    <a href="${url}">${row.time}</a>&nbsp;${row.text}-->
-        <a class="link" data-time="${row.time}">${row.time}</a>&nbsp;${row.text}
-    </div>
-    `;
-}
-
 function linkClick(e) {
     const target = e.target;
     const time = target.getAttribute('data-time');
-    console.log(time);
     if (time) {
         e.preventDefault();
         chrome.runtime.sendMessage({

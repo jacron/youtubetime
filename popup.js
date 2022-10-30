@@ -50,9 +50,9 @@ function makeLinks() {
 
 }
 
-function show(element) {
-    element.style.visibility = 'visible';
-}
+// function show(element) {
+//     element.style.visibility = 'visible';
+// }
 
 function showCopiedMessage() {
     msgOneNoteCopied.style.visibility = 'visible';
@@ -62,21 +62,21 @@ function showCopiedTextMessage() {
     msgTimeQuoteCopied.style.visibility = 'visible';
 }
 
-function showCopiedCodeMessage(code) {
-    show(msgCodeCopied);
-    msgCode.innerText = code;
-    show(msgCode);
-}
+// function showCopiedCodeMessage(code) {
+//     show(msgCodeCopied);
+//     msgCode.innerText = code;
+//     show(msgCode);
+// }
 
 function codeFromUrl() {
     const regex = /\/watch\?v=(.*?)&/;  // non greedy
     return inputUrl.value.match(regex)[1];
 }
 
-function copyCode() {
-    const code = codeFromUrl();
-    copyToText(code, () => showCopiedCodeMessage(code));
-}
+// function copyCode() {
+//     const code = codeFromUrl();
+//     copyToText(code, () => showCopiedCodeMessage(code));
+// }
 
 function copyOneNote() {
     const indexText = textIndex.value;  // content of the textarea (time-table)
@@ -85,15 +85,10 @@ function copyOneNote() {
     }
 }
 
-const KEY_TIMETABLE = 'youtubeTimeTable';
-
 function save() {
     const indexText = textIndex.value;  // content of the textarea (time-table)
-    console.log(indexText);
     const code = codeFromUrl();
     chrome.storage.sync.set({[code]: indexText});
-    // localStorage.setItem(KEY_TIMETABLE, indexText);
-
 }
 
 function hide(element) {
@@ -126,8 +121,8 @@ function receiveActiveUrl(current) {
     const code = codeFromUrl();
     console.log(code);
     chrome.storage.sync.get(code, items => {
-        console.log(items)
         textIndex.value = items[code];
+        makeLinks();
     });
 }
 

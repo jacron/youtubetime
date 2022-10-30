@@ -19,3 +19,6 @@ p.header {
     font-size: large;
     color: chocolate;
 }
+.link:hover {
+    text-decoration: underline;
+}

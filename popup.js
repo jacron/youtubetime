@@ -122,21 +122,20 @@ function makeLink(row) {
     return `
     <div>
 <!--    <a href="${url}">${row.time}</a>&nbsp;${row.text}-->
-        <a class="link" href="${url}">${row.time}</a>&nbsp;${row.text}
+        <a class="link" data-time="${row.time}">${row.time}</a>&nbsp;${row.text}
     </div>
     `;
 }
 
 function linkClick(e) {
-    console.log(e);
     const target = e.target;
-    console.dir(target);
-    console.log(target.href);
-    if (target.href) {
+    const time = target.getAttribute('data-time');
+    console.log(time);
+    if (time) {
         e.preventDefault();
         chrome.runtime.sendMessage({
             request: 'changeLocation',
-            url: target.href
+            time
         }, () => {
         })
     }

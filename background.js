@@ -2,7 +2,7 @@ let actionWinId = null;
 let current = {};
 let lastActiveTabId = null;
 const NOTIFY_ADJUST = 'onenoteadjustclipboard';
-let requestedUrl = '';
+let requestedTime = '';
 
 
 function createContextMenus() {
@@ -54,11 +54,47 @@ function browserActionListener() {
     }
 }
 
-function changeLocation(tabs) {
-    console.log(tabs);
-    if (tabs[0]) {
-        chrome.tabs.update(tabs[0].id, {url: requestedUrl}).then(r => {});
+function getSeconds(time) {
+    const parts = time.split(':');
+    let seconds;
+    if (parts.length > 2) {
+        seconds = parts[0] * 60 * 60;
+        seconds += parts[1] * 60;
+        seconds += parseInt(parts[2]);
+    } else if (parts.length > 1) {
+        seconds = parts[0] * 60;
+        seconds += parseInt(parts[1]);
+    } else {
+        seconds = parts[0];
     }
+    return seconds;
+}
+
+function getTimeParmFromUrl(url) {
+    let pos = url.indexOf('&t=');
+    if (pos === -1) {
+        pos = url.indexOf('?t=');
+    }
+    return pos;
+}
+
+function googleUrlWithTime(time, url) {
+    const seconds = getSeconds(time) + 's';
+    const pos = getTimeParmFromUrl(url);
+    if (pos !== -1) {
+        return url.substring(0, pos + 3) + seconds;
+    } else {
+        const qpos = url.indexOf('?');
+        if (qpos !== -1) {
+            return url + '&t=' + seconds;
+        } else {
+            return url + '?t=' + seconds;
+        }
+    }
+}
+
+function changeLocation() {
+    chrome.tabs.update(current.tab.id, {url: googleUrlWithTime(requestedTime, current.url)});
 }
 
 function onQuery(tabs) {
@@ -66,6 +102,7 @@ function onQuery(tabs) {
         const {url, title} = tabs[0];
         current.url = url;
         current.title = title;
+        current.tab = tabs[0];
         initView();
     }
 }
@@ -84,8 +121,7 @@ function clientRequestListener(req, sender, sendResponse) {
                 sendResponse(current);
                 break;
             case 'changeLocation':
-                console.log(req.url);
-                requestedUrl = req.url;
+                requestedTime = req.time;
                 queryActiveTab(changeLocation)
                 break;
             default:

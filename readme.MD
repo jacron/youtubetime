@@ -7,6 +7,7 @@ voorbeeld timetable in description:
 https://www.youtube.com/watch?v=U5SOD-eeK50&t=54s
 
 00:00 - Intro
+
 00:13 - Add the new data source
 
 <a class="yt-simple-endpoint style-scope yt-formatted-string" spellcheck="false" href="/watch?v=U5SOD-eeK50&amp;t=0s"
@@ -19,3 +20,6 @@ dir="auto">00:13</a>
 </span>
 
 
+Kopieer naar OneNote (rich text) of YouTube comment (plain text)
+
+Plan: sla tijdtabel op voor de actuele webpagina en maak tijd ook in de popup zelf klikbaar.

@@ -2,6 +2,8 @@ let actionWinId = null;
 let current = {};
 let lastActiveTabId = null;
 const NOTIFY_ADJUST = 'onenoteadjustclipboard';
+let requestedUrl = '';
+
 
 function createContextMenus() {
     chrome.contextMenus.create(
@@ -20,7 +22,7 @@ function createContextMenus() {
  * @param info
  * @param tab
  */
-function contextMenuClickListener(info, tab) {
+function contextMenuListener(info, tab) {
     // console.log(info);
     chrome.tabs.sendMessage(tab.id, {
         notify: NOTIFY_ADJUST,
@@ -44,11 +46,18 @@ function closeView() {
     }
 }
 
-function actionListener() {
+function browserActionListener() {
     if (actionWinId === null) {
-        queryActiveTab();
+        queryActiveTab(onQuery);
     } else {
         closeView();
+    }
+}
+
+function changeLocation(tabs) {
+    console.log(tabs);
+    if (tabs[0]) {
+        chrome.tabs.update(tabs[0].id, {url: requestedUrl}).then(r => {});
     }
 }
 
@@ -61,26 +70,36 @@ function onQuery(tabs) {
     }
 }
 
-function queryActiveTab() {
+function queryActiveTab(cb) {
     chrome.tabs.query({
         active: true,
         lastFocusedWindow: true
-    }, onQuery);
+    }, cb);
 }
 
-function listenClientRequest(req, sender, sendResponse) {
-    if (req.request && req.request === 'getActiveUrl') {
-        sendResponse(current);
-    } else {
-        sendResponse('invalid request');
+function clientRequestListener(req, sender, sendResponse) {
+    if (req.request) {
+        switch(req.request) {
+            case 'getActiveUrl':
+                sendResponse(current);
+                break;
+            case 'changeLocation':
+                console.log(req.url);
+                requestedUrl = req.url;
+                queryActiveTab(changeLocation)
+                break;
+            default:
+                sendResponse('invalid request');
+                break;
+        }
     }
 }
 
-function onRemoval(windowId) {
+function windowRemovalListener(windowId) {
     if (windowId === actionWinId) {
         actionWinId = null;
     }
-    activationListener();
+    tabActivationListener();
 }
 
 function queryListener(tabs) {
@@ -99,7 +118,7 @@ function queryListener(tabs) {
     }
 }
 
-function activationListener(activeInfo) {
+function tabActivationListener(activeInfo) {
     if (activeInfo && activeInfo.tabId !== lastActiveTabId) {
         closeView();
     }
@@ -109,15 +128,15 @@ function activationListener(activeInfo) {
     }, queryListener);
 }
 
-function updateListener(tabId) {
+function tabUpdateListener(tabId) {
     lastActiveTabId = tabId;
-    activationListener();
+    tabActivationListener();
 }
 
 chrome.runtime.onInstalled.addListener(createContextMenus)
-chrome.runtime.onMessage.addListener(listenClientRequest);
-chrome.contextMenus.onClicked.addListener(contextMenuClickListener);
-chrome.browserAction.onClicked.addListener(actionListener);
-chrome.windows.onRemoved.addListener(onRemoval);
-chrome.tabs.onActivated.addListener(activationListener);
-chrome.tabs.onUpdated.addListener(updateListener);
+chrome.runtime.onMessage.addListener(clientRequestListener);
+chrome.contextMenus.onClicked.addListener(contextMenuListener);
+chrome.browserAction.onClicked.addListener(browserActionListener);
+chrome.windows.onRemoved.addListener(windowRemovalListener);
+chrome.tabs.onActivated.addListener(tabActivationListener);
+chrome.tabs.onUpdated.addListener(tabUpdateListener);

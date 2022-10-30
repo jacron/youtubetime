@@ -1,9 +1,10 @@
-import {copyToHtml, copyToText, currentTab, getSeconds} from "./lib.js";
-import {bindToClick} from "./bind.js";
+import {copyToHtml, copyToText, currentTab, googleUrlWithTime, makeTimeTable} from "./lib.js";
+import {bindToAnyKey, bindToClick} from "./bind.js";
 
 const inputUrl = document.getElementById('inputUrl');
 const pTitle = document.getElementById('pTitle');
 const textIndex = document.getElementById('textIndex')
+const links = document.getElementById('links');
 
 const buttonCopyCode = document.getElementById('buttonCopyCode');
 const buttonCopyOneNote = document.getElementById('buttonCopyOneNote');
@@ -15,54 +16,21 @@ const msgOneNoteCopied = document.getElementById('msgOneNoteCopied');
 const msgTimeQuoteCopied = document.getElementById('msgTextCopied');
 
 function makeOneNoteLine(t, subject) {
-    const url = urlWithTime(t);
+    const url = googleUrlWithTime(t, inputUrl.value);
     return `
 <p style="margin:0;font-family:Calibri;font-size:12.0pt" lang="nl">
 <!--StartFragment-->
 <a href="${url}">${t}</a> ${subject}
 <!--EndFragment--></p>
 `;
-
 }
 
 function makeOneNote(indexText) {
-    const lines = indexText.split('\n');
     let html = '';
-    for (const line of lines) {
-        if (line.length > 0) {
-            const words = line.split(' ');
-            if (words.length > 1) {
-                const time = words[0];
-                words.shift();
-                html += makeOneNoteLine(time, words.join(' '));
-            }
-        }
+    for (const row of makeTimeTable(indexText)) {
+        html += makeOneNoteLine(row.time, row.text);
     }
     return html;
-}
-
-function getTimeParmFromUrl() {
-    let pos = inputUrl.value.indexOf('&t=');
-    if (pos === -1) {
-        pos = inputUrl.value.indexOf('?t=');
-    }
-    return pos;
-}
-
-function urlWithTime(time) {
-    const urlValue = inputUrl.value;
-    const seconds = getSeconds(time) + 's';
-    const pos = getTimeParmFromUrl();
-    if (pos !== -1) {
-        return urlValue.substring(0, pos + 3) + seconds;
-    } else {
-        const qpos = urlValue.indexOf('?');
-        if (qpos !== -1) {
-            return urlValue + '&t=' + seconds;
-        } else {
-            return urlValue + '?t=' + seconds;
-        }
-    }
 }
 
 function copyText() {
@@ -70,6 +38,15 @@ function copyText() {
     if (indexText.length > 0) {
         copyToText(indexText, showCopiedTextMessage);
     }
+}
+
+function makeLinks() {
+    let html = '';
+    for (const row of makeTimeTable(textIndex.value)) {
+        html += makeLink(row);
+    }
+    links.innerHTML = html;
+
 }
 
 function show(element) {
@@ -115,8 +92,12 @@ function bind() {
     bindToClick([
         [buttonCopyCode, copyCode],
         [buttonCopyOneNote, copyOneNote],
-        [buttonCopyToHtml, copyText]
+        [buttonCopyToHtml, copyText],
+        [document, linkClick]
     ]);
+    bindToAnyKey([
+        [textIndex, makeLinks]
+    ])
 }
 
 function hideMessages() {
@@ -129,6 +110,36 @@ function hideMessages() {
 function receiveActiveUrl(current) {
     inputUrl.value = current.url;
     pTitle.innerText = current.title;
+}
+
+/*
+de link in de popup naar youtube with time
+moet in de actuele pagina de locatie veranderen
+wat via background en messaging zal moeten gaan
+ */
+function makeLink(row) {
+    const url = googleUrlWithTime(row.time, inputUrl.value);
+    return `
+    <div>
+<!--    <a href="${url}">${row.time}</a>&nbsp;${row.text}-->
+        <a class="link" href="${url}">${row.time}</a>&nbsp;${row.text}
+    </div>
+    `;
+}
+
+function linkClick(e) {
+    console.log(e);
+    const target = e.target;
+    console.dir(target);
+    console.log(target.href);
+    if (target.href) {
+        e.preventDefault();
+        chrome.runtime.sendMessage({
+            request: 'changeLocation',
+            url: target.href
+        }, () => {
+        })
+    }
 }
 
 function init() {

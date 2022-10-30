@@ -1,27 +1,3 @@
-function getTime(seconds) {
-    const extra = seconds.indexOf('&');
-    if (extra !== -1) {
-        seconds = seconds.substring(0, extra);
-    }
-    if (seconds.substring(seconds.length-1) === 's') {
-        seconds = seconds.substring(0, seconds.length-1);
-    }
-    let minutes = Math.floor(seconds / 60);
-    seconds = seconds % 60;
-    if (seconds < 10) {
-        seconds = '0' + seconds;
-    }
-    const hours = Math.floor(minutes / 60);
-    if (hours) {
-        minutes = minutes % 60;
-        if (minutes < 10) {
-            minutes = '0' + minutes;
-        }
-        return `${hours}:${minutes}:${seconds}`;
-    }
-    return `${minutes}:${seconds}`;
-}
-
 function getSeconds(time) {
     const parts = time.split(':');
     let seconds;
@@ -47,19 +23,6 @@ function currentTab(cb) {
     });
 }
 
-function reformatTime(time) {
-    const parts = time.split(':');
-    if (parts.length < 2) {
-        return time;
-    }
-    for (let i = 1; i < parts.length; i++) {
-        if (parts[i].length === 1) {
-            parts[i] = '0' + parts[i];
-        }
-    }
-    return parts.join(':');
-}
-
 function copyToHtml(html, cb) {
     const blob = new Blob([html], {type: 'text/html'});
     const item = new ClipboardItem({
@@ -76,4 +39,47 @@ function copyToText(text, cb) {
     navigator.clipboard.write([item]).then(cb);
 }
 
-export {getSeconds, getTime, currentTab, reformatTime, copyToHtml, copyToText}
+function getTimeParmFromUrl(url) {
+    let pos = url.indexOf('&t=');
+    if (pos === -1) {
+        pos = url.indexOf('?t=');
+    }
+    return pos;
+}
+
+function googleUrlWithTime(time, url) {
+    const seconds = getSeconds(time) + 's';
+    const pos = getTimeParmFromUrl(url);
+    if (pos !== -1) {
+        return url.substring(0, pos + 3) + seconds;
+    } else {
+        const qpos = url.indexOf('?');
+        if (qpos !== -1) {
+            return url + '&t=' + seconds;
+        } else {
+            return url + '?t=' + seconds;
+        }
+    }
+}
+
+function makeTimeTable(text) {
+    const lines = text.split('\n');
+    const timeTable = [];
+    for (const line of lines) {
+        if (line.length > 0) {
+            const words = line.split(' ');
+            if (words.length > 1) {
+                const time = words[0];
+                words.shift();
+                timeTable.push({
+                    time,
+                    text: words.join(' ')
+                })
+            }
+        }
+    }
+    return timeTable;
+}
+
+export {getSeconds, currentTab, copyToHtml, copyToText,
+    googleUrlWithTime, makeTimeTable}

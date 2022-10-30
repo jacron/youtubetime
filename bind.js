@@ -8,6 +8,14 @@ function bindToEnterKey(inputs) {
     }
 }
 
+function bindToAnyKey(inputs) {
+    for (const [input, listener] of inputs) {
+        input.addEventListener('keyup', function(e) {
+            listener();
+        })
+    }
+}
+
 function bindToClick(buttons) {
     for (const [button, listener] of buttons) {
         if (!button) {
@@ -24,4 +32,4 @@ function bindToChange(inputs) {
     }
 }
 
-export {bindToEnterKey, bindToClick, bindToChange}
+export {bindToEnterKey, bindToAnyKey, bindToClick, bindToChange}

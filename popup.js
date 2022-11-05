@@ -121,7 +121,7 @@ function receiveActiveUrl(current) {
     const code = codeFromUrl();
     console.log(code);
     chrome.storage.sync.get(code, items => {
-        textIndex.value = items[code];
+        textIndex.value = items[code] || '';
         makeLinks();
     });
 }

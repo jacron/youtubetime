@@ -19,6 +19,11 @@ p.header {
     font-size: large;
     color: chocolate;
 }
+.link {
+    color: sienna;
+    display: inline-block;
+    width: 40px;
+}
 .link:hover {
     text-decoration: underline;
 }

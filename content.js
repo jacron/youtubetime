@@ -1,5 +1,7 @@
 const NOTIFY_ADJUST = 'onenoteadjustclipboard';
 
+console.log('*** youtubetimes loaded!');
+
 function isTimeLeading(text) {
     // console.log(text);
     const words = text.split(' ');
